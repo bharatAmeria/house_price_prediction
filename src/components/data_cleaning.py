@@ -75,16 +75,22 @@ class DataDivideStrategy(DataStrategy):
             logging.error(e)
             raise e
 
+class FeatureEngg:
+    """
+    Feature engineering class which preprocesses the data and divides it into train and test data.
+    """
+    pass
 
 class DataCleaning:
     """
     Data cleaning class which preprocesses the data and divides it into train and test data.
     """
 
-    def __init__(self, data: pd.DataFrame, strategy: DataStrategy) -> None:
+    def __init__(self, data: pd.DataFrame, strategy: DataStrategy, featureEngg: FeatureEngg) -> None:
         """Initializes the DataCleaning class with a specific strategy."""
         self.df = data
         self.strategy = strategy
+        self.featureEngg = featureEngg
 
     def handle_data(self) -> Union[pd.DataFrame, pd.Series]:
         """Handle data based on the provided strategy"""
