@@ -6,7 +6,6 @@ import pandas as pd
 
 from src import logger
 
-
 from src.entity.config_entity import DataIngestionConfig
 
 
@@ -18,8 +17,9 @@ class IngestData:
     def __init__(self, config: DataIngestionConfig):
         """Initialize the data ingestion class."""
         self.config = config
+        self.data_Path = self.config.data_path
 
-    def download_file(self) -> str:
+    def download_file(self):
         """ Fetch data from the url """
 
         try:
@@ -48,6 +48,6 @@ class IngestData:
         with zipfile.ZipFile(self.config.local_data_file, 'r') as zip_ref:
             zip_ref.extractall(unzip_path)
 
-
-
-
+    def get_data(self) -> pd.DataFrame:
+        df = pd.read_csv(self.config.data_path)
+        return df

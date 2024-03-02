@@ -5,7 +5,4 @@ data_ingestion:
   source_URL: https://drive.google.com/file/d/1-MHHHItW1R2uPwD5zMfSL2811C9TbK6e/view?usp=share_link
   local_data_file: artifacts/data_ingestion/data.zip
   unzip_dir: artifacts/data_ingestion
-
-data:
-  data_dir: artifacts/data_ingestion/gurgaon_properties/gurgaon_properties.csv
-
+  data_path: artifacts/data_ingestion/gurgaon_properties/gurgaon_properties.csv

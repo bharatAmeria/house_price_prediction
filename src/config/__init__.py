@@ -1,6 +1,4 @@
-import pandas as pd
+from pathlib import Path
 
-
-def data_dir() -> pd.DataFrame:
-    data = pd.read_csv("artifacts/data_ingestion/gurgaon_properties/gurgaon_properties.csv")
-    return data
+CONFIG_FILE_PATH = Path("config/config.yaml")
+PARAMS_FILE_PATH = Path("params.yaml")

@@ -8,7 +8,9 @@ class DataIngestionConfig:
     source_URL: str
     local_data_file: Path
     unzip_dir: Path
+    data_path: Path
 
-@dataclass(frozen=True)
-class Data:
-    data_dir: Path
+class ModelNameConfig:
+    """Model Configurations"""
+    model_name: str = "lightgbm"
+    fine_tuning: bool = False
