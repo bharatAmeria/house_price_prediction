@@ -1,4 +1,4 @@
-from src.entity.config_entity import DataIngestionConfig
+from src.entity.config_entity import DataIngestionConfig, Data
 from src.utils.common import read_yaml, create_directories
 from src.utils.constants import CONFIG_FILE_PATH, PARAMS_FILE_PATH
 
@@ -19,7 +19,14 @@ class ConfigurationManager:
             root_dir=config.root_dir,
             source_URL=config.source_URL,
             local_data_file=config.local_data_file,
-            unzip_dir=config.unzip_dir
+            unzip_dir=config.unzip_dir,
         )
 
         return data_ingestion_config
+
+    def get_data(self) -> Data:
+        config = self.config.data
+
+        data_provider = Data(data_dir=config.data_dir)
+
+        return data_provider
