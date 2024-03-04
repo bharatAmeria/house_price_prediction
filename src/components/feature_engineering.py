@@ -1,25 +1,25 @@
-from abc import ABC, abstractmethod
-from typing import Union
 import re
+from typing import Tuple, Union
+
 import numpy as np
 import pandas as pd
+from sklearn.cluster import KMeans
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 from src import logger
 
 
-class FeatureEngineeringStrategy(ABC):
+class FeatureEngineeringStrategy:
     """
     Abstract Class defining strategy for handling data
     """
-
-    @abstractmethod
     def handle_FE(self, data: pd.DataFrame) -> Union[pd.DataFrame, pd.Series]:
         pass
 
 
 class FeatureEngineeringConfig(FeatureEngineeringStrategy):
-    def handle_FE(self, data: pd.DataFrame) -> Union[pd.DataFrame, pd.Series]:
+    def handle_FE(self, data: pd.DataFrame) -> pd.DataFrame:
         """
         Feature engineering strategy which preprocesses the data.
         """
@@ -121,6 +121,62 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
 
             data['agePossession'] = data['agePossession'].apply(categorize_age_possession)
 
+            """ Furnishing Details"""
+            # Extract all unique furnishings from the furnishDetails column
+            all_furnishings = []
+            for detail in data['furnishDetails'].dropna():
+                furnishings = detail.replace('[', '').replace(']', '').replace("'", "").split(', ')
+                all_furnishings.extend(furnishings)
+            unique_furnishings = list(set(all_furnishings))
+
+            # Define a function to extract the count of a furnishing from the furnishDetails
+            def get_furnishing_count(details, furnishing):
+                if isinstance(details, str):
+                    if f"No {furnishing}" in details:
+                        return 0
+                    pattern = re.compile(f"(\d+) {furnishing}")
+                    match = pattern.search(details)
+                    if match:
+                        return int(match.group(1))
+                    elif furnishing in details:
+                        return 1
+                return 0
+
+            # Simplify the furnishings list by removing "No" prefix and numbers
+            columns_to_include = [re.sub(r'No |\d+', '', furnishing).strip() for furnishing in unique_furnishings]
+            columns_to_include = list(set(columns_to_include))  # Get unique furnishings
+            columns_to_include = [furnishing for furnishing in columns_to_include if furnishing]  # Remove empty strings
+
+            # Create new columns for each unique furnishing and populate with counts
+            for furnishing in columns_to_include:
+                data[furnishing] = data['furnishDetails'].apply(lambda x: get_furnishing_count(x, furnishing))
+
+            # Create the new dataframe with the required columns
+            furnishings_df = data[['furnishDetails'] + columns_to_include]
+            furnishings_df.drop(columns=['furnishDetails'], inplace=True)
+
+            scaler = StandardScaler()
+            scaled_data = scaler.fit_transform(furnishings_df)
+
+            wcss_reduced = []
+
+            for i in range(1, 11):
+                kmeans = KMeans(n_clusters=i, init='k-means++', random_state=42)
+                kmeans.fit(scaled_data)
+                wcss_reduced.append(kmeans.inertia_)
+
+            n_clusters = 3
+
+            # Fit the KMeans model
+            kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+            kmeans.fit(scaled_data)
+
+            # Predict the cluster assignments for each row
+            cluster_assignments = kmeans.predict(scaled_data)
+
+            data = data.iloc[:, :-18]
+            data['furnishing_type'] = cluster_assignments
+
             return data
         except Exception as e:
             logger.error(e)
@@ -131,13 +187,13 @@ class DataDivideStrategy(FeatureEngineeringStrategy):
     Data dividing strategy which divides the data into train and test data.
     """
 
-    def handle_FE(self, data: pd.DataFrame) -> Union[pd.DataFrame, pd.Series]:
+    def handle_FE(self, data: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
         """
         Divides the data into train and test data.
         """
         try:
-            X = data.drop("review_score", axis=1)
-            y = data["review_score"]
+            X = data.drop("price", axis=1)
+            y = data["price"]
             X_train, X_test, y_train, y_test = train_test_split(
                 X, y, test_size=0.2, random_state=42
             )
@@ -152,10 +208,14 @@ class FeatureEngineering:
     Feature engineering class which preprocesses the data and divides it into train and test data.
     """
 
-    def __init__(self, strategy: FeatureEngineeringStrategy, data: pd.DataFrame) -> None:
-        self.df = data
-        self.strategy = strategy
+    def __init__(self):
+        self.cleaned_data = None
+        self.strategy = None
 
-    def handle_FE(self) -> Union[pd.DataFrame, pd.Series]:
-        """Handle data based on the provided strategy"""
-        return self.strategy.handle_FE(self.df)
+    def handle_FE(self, cleaned_data: pd.DataFrame):
+        self.cleaned_data = cleaned_data
+        self.strategy = FeatureEngineeringStrategy()
+        return self.strategy.handle_FE(self.cleaned_data)
+
+
+
