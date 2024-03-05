@@ -1,5 +1,5 @@
 import re
-from typing import Tuple, Union
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -182,12 +182,144 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
             logger.error(e)
             raise e
 
+class OutlierTreatment(FeatureEngineeringStrategy):
+    def handle_FE(self, df: pd.DataFrame) -> pd.DataFrame:
+        # Calculate the IQR for the 'price' column
+        Q1 = df['price'].quantile(0.25)
+        Q3 = df['price'].quantile(0.75)
+        IQR = Q3 - Q1
+
+        # Define bounds for outliers
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+
+        # Identify outliers
+        outliers = df[(df['price'] < lower_bound) | (df['price'] > upper_bound)]
+
+        # Displaying the number of outliers and some statistics
+        outliers_price_stats = outliers['price'].describe()
+
+        # Calculate the IQR for the 'price' column
+        Q1 = df['price_per_sqft'].quantile(0.25)
+        Q3 = df['price_per_sqft'].quantile(0.75)
+        IQR = Q3 - Q1
+
+        # Define bounds for outliers
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+
+        # Identify outliers
+        outliers_sqft = df[(df['price_per_sqft'] < lower_bound) | (df['price_per_sqft'] > upper_bound)]
+
+        # Displaying the number of outliers and some statistics
+
+        outliers_sqft['area'] = outliers_sqft['area'].apply(lambda x: x * 9 if x < 1000 else x)
+        outliers_sqft['price_per_sqft'] = round((outliers_sqft['price'] * 10000000) / outliers_sqft['area'])
+        data.update(outliers_sqft)
+
+        """Area"""
+        df.drop(index=[818, 1796, 1123, 2, 2356, 115, 3649, 2503, 1471], inplace=True)
+        df.loc[48, 'area'] = 115 * 9
+        df.loc[300, 'area'] = 7250
+        df.loc[2666, 'area'] = 5800
+        df.loc[1358, 'area'] = 2660
+        df.loc[3195, 'area'] = 2850
+        df.loc[2131, 'area'] = 1812
+        df.loc[3088, 'area'] = 2160
+        df.loc[3444, 'area'] = 1175
+
+        df.loc[2131, 'carpet_area'] = 1812
+        df['price_per_sqft'] = round((df['price'] * 10000000) / df['area'])
+        x = df[df['price_per_sqft'] <= 20000]
+        (x['area'] / x['bedRoom']).quantile(0.02)
+
+        sbc_df = df[
+            ~(df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & ~(df['carpet_area'].isnull())]
+
+        sbc_df['built_up_area'].fillna(
+            round(((sbc_df['super_built_up_area'] / 1.105) + (sbc_df['carpet_area'] / 0.9)) / 2),
+            inplace=True)
+        df.update(sbc_df)
+
+        # sb present c is null built up null
+        sb_df = df[
+            ~(df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & (df['carpet_area'].isnull())]
+
+        sb_df['built_up_area'].fillna(round(sb_df['super_built_up_area'] / 1.105), inplace=True)
+        df.update(sb_df)
+
+        # sb null c is present built up null
+        c_df = df[(df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & ~(df['carpet_area'].isnull())]
+        c_df['built_up_area'].fillna(round(c_df['carpet_area'] / 0.9), inplace=True)
+        df.update(c_df)
+
+        anamoly_df = df[(df['built_up_area'] < 2000) & (df['price'] > 2.5)][['price', 'area', 'built_up_area']]
+        anamoly_df['built_up_area'] = anamoly_df['area']
+        df.update(anamoly_df)
+
+        df['floorNum'].fillna(2.0, inplace=True)
+        df.drop(columns=['facing'], inplace=True)
+        df.drop(index=[2536], inplace=True)
+
+        def mode_based_imputation(row):
+            if row['agePossession'] == 'Undefined':
+                mode_value = df[(df['sector'] == row['sector']) & (df['property_type'] == row['property_type'])][
+                    'agePossession'].mode()
+                # If mode_value is empty (no mode found), return NaN, otherwise return the mode
+                if not mode_value.empty:
+                    return mode_value.iloc[0]
+                else:
+                    return np.nan
+            else:
+                return row['agePossession']
+
+        df['agePossession'] = df.apply(mode_based_imputation, axis=1)
+
+        def mode_based_imputation2(row):
+            if row['agePossession'] == 'Undefined':
+                mode_value = df[(df['sector'] == row['sector'])]['agePossession'].mode()
+                # If mode_value is empty (no mode found), return NaN, otherwise return the mode
+                if not mode_value.empty:
+                    return mode_value.iloc[0]
+                else:
+                    return np.nan
+            else:
+                return row['agePossession']
+
+        df['agePossession'] = df.apply(mode_based_imputation2, axis=1)
+
+        def mode_based_imputation3(row):
+            if row['agePossession'] == 'Undefined':
+                mode_value = df[(df['property_type'] == row['property_type'])]['agePossession'].mode()
+                # If mode_value is empty (no mode found), return NaN, otherwise return the mode
+                if not mode_value.empty:
+                    return mode_value.iloc[0]
+                else:
+                    return np.nan
+            else:
+                return row['agePossession']
+
+        df['agePossession'] = df.apply(mode_based_imputation3, axis=1)
+
+        return df
+
+class Appartments(FeatureEngineeringStrategy):
+    pass
+
+class FeatureSelection(FeatureEngineeringStrategy):
+    def handle_FE(self, df: pd.DataFrame) -> pd.DataFrame:
+        train_df = df.drop(columns=['society', 'price_per_sqft'])
+        train_df.corr()['price'].sort_values(ascending=False)
+
+        return df
+
+
 class DataDivideStrategy(FeatureEngineeringStrategy):
     """
     Data dividing strategy which divides the data into train and test data.
     """
 
-    def handle_FE(self, data: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+    def handle_FE(self, data: pd.DataFrame) -> Union[pd.DataFrame, pd.Series]:
         """
         Divides the data into train and test data.
         """
@@ -208,13 +340,11 @@ class FeatureEngineering:
     Feature engineering class which preprocesses the data and divides it into train and test data.
     """
 
-    def __init__(self):
-        self.cleaned_data = None
-        self.strategy = None
+    def __init__(self, data: pd.DataFrame, strategy: FeatureEngineeringStrategy) -> None:
+        self.cleaned_data = data
+        self.strategy = strategy
 
-    def handle_FE(self, cleaned_data: pd.DataFrame):
-        self.cleaned_data = cleaned_data
-        self.strategy = FeatureEngineeringStrategy()
+    def handle_FE(self) -> Union[pd.DataFrame, pd.Series]:
         return self.strategy.handle_FE(self.cleaned_data)
 
 

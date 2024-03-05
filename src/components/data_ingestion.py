@@ -4,7 +4,7 @@ import zipfile
 import gdown
 import pandas as pd
 
-from src import logger
+from src import logger, config
 
 from src.entity.config_entity import DataIngestionConfig
 
@@ -51,3 +51,4 @@ class IngestData:
     def get_data(self) -> pd.DataFrame:
         df = pd.read_csv(self.config.data_path)
         return df
+

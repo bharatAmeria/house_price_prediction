@@ -1,6 +1,6 @@
-from src.entity.config_entity import DataIngestionConfig
+from src.entity.config_entity import DataIngestionConfig, EvaluationConfig
 from src.utils.common import read_yaml, create_directories
-from src.components.constants.constants import CONFIG_FILE_PATH, PARAMS_FILE_PATH
+from src.constants.constants import CONFIG_FILE_PATH, PARAMS_FILE_PATH
 
 class ConfigurationManager:
     def __init__(self, config_filepath=CONFIG_FILE_PATH, params_filepath=PARAMS_FILE_PATH):
@@ -23,3 +23,14 @@ class ConfigurationManager:
         )
 
         return data_ingestion_config
+
+    def get_evaluation_config(self) -> EvaluationConfig:
+        eval_config = EvaluationConfig(
+            path_of_model="artifacts/training/model.h5",
+            training_data="artifacts/data_ingestion/gurgaon_properties/gurgaon_properties.csv",
+            mlflow_uri=" ",
+            all_params=self.params,
+        )
+        return eval_config
+
+

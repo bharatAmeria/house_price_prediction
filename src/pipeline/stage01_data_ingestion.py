@@ -1,9 +1,8 @@
 from src import logger
-from src.config.configuration import ConfigurationManager
 from src.components.data_ingestion import IngestData
+from src.config.configuration import ConfigurationManager
 
 STAGE_NAME = "Data Ingestion stage"
-
 
 class DataIngestionTrainingPipeline:
     def __init__(self):

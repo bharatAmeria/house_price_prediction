@@ -6,3 +6,14 @@ data_ingestion:
   local_data_file: artifacts/data_ingestion/data.zip
   unzip_dir: artifacts/data_ingestion
   data_path: artifacts/data_ingestion/gurgaon_properties/gurgaon_properties.csv
+
+evaluation:
+    cmd: python src/cnnClassifier/pipeline/stage_04_model_evaluation.py
+    deps:
+      - src/cnnClassifier/pipeline/stage_04_evaluation.py
+      - config/config.yaml
+      - artifacts/data_ingestion/house_price_pred
+      - artifacts/training/model.h5
+    metrics:
+    - scores.json:
+        cache: false
