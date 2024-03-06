@@ -46,6 +46,8 @@ class ConfigurationManager:
             model_dir=config.model_dir,
         )
 
+        return model_config
+
     def get_evaluation_config(self) -> EvaluationConfig:
         eval_config = EvaluationConfig(
             path_of_model="artifacts/training/model.h5",
