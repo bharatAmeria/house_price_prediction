@@ -1,6 +1,7 @@
-from src.entity.config_entity import DataIngestionConfig, EvaluationConfig
+from src.entity.config_entity import DataIngestionConfig, EvaluationConfig, DataTransformationConfig, ModelTrainerConfig
 from src.utils.common import read_yaml, create_directories
 from src.constants.constants import CONFIG_FILE_PATH, PARAMS_FILE_PATH
+
 
 class ConfigurationManager:
     def __init__(self, config_filepath=CONFIG_FILE_PATH, params_filepath=PARAMS_FILE_PATH):
@@ -24,6 +25,27 @@ class ConfigurationManager:
 
         return data_ingestion_config
 
+    def get_data_transformation_config(self) -> DataTransformationConfig:
+        config = self.config.data_transformation
+
+        create_directories([config.root_dir])
+
+        data_transformation_config = DataTransformationConfig(
+            root_dir=config.root_dir,
+            directory=config.directory,
+        )
+
+        return data_transformation_config
+
+    def get_model_trainer_config(self) -> ModelTrainerConfig:
+        config = self.config.model_trainer_config
+
+        create_directories([config.root_dir])
+        model_config = ModelTrainerConfig(
+            root_dir=config.root_dir,
+            model_dir=config.model_dir,
+        )
+
     def get_evaluation_config(self) -> EvaluationConfig:
         eval_config = EvaluationConfig(
             path_of_model="artifacts/training/model.h5",
@@ -32,5 +54,3 @@ class ConfigurationManager:
             all_params=self.params,
         )
         return eval_config
-
-

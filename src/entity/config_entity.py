@@ -10,10 +10,15 @@ class DataIngestionConfig:
     unzip_dir: Path
     data_path: Path
 
-class ModelNameConfig:
-    """Model Configurations"""
-    model_name: str = "lightgbm"
-    fine_tuning: bool = False
+@dataclass(frozen=True)
+class DataTransformationConfig:
+    root_dir: Path
+    directory: Path
+
+@dataclass(frozen=True)
+class ModelTrainerConfig:
+    root_dir: Path
+    model_dir: Path
 
 @dataclass(frozen=True)
 class EvaluationConfig:

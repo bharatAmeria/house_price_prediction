@@ -185,8 +185,8 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
 class OutlierTreatment(FeatureEngineeringStrategy):
     def handle_FE(self, data: pd.DataFrame) -> pd.DataFrame:
         # Calculate the IQR for the 'price' column
-        Q1 = df['price'].quantile(0.25)
-        Q3 = df['price'].quantile(0.75)
+        Q1 = data['price'].quantile(0.25)
+        Q3 = data['price'].quantile(0.75)
         IQR = Q3 - Q1
 
         # Define bounds for outliers
@@ -194,14 +194,14 @@ class OutlierTreatment(FeatureEngineeringStrategy):
         upper_bound = Q3 + 1.5 * IQR
 
         # Identify outliers
-        outliers = df[(df['price'] < lower_bound) | (df['price'] > upper_bound)]
+        outliers = data[(data['price'] < lower_bound) | (data['price'] > upper_bound)]
 
         # Displaying the number of outliers and some statistics
         outliers_price_stats = outliers['price'].describe()
 
         # Calculate the IQR for the 'price' column
-        Q1 = df['price_per_sqft'].quantile(0.25)
-        Q3 = df['price_per_sqft'].quantile(0.75)
+        Q1 = data['price_per_sqft'].quantile(0.25)
+        Q3 = data['price_per_sqft'].quantile(0.75)
         IQR = Q3 - Q1
 
         # Define bounds for outliers
@@ -209,7 +209,7 @@ class OutlierTreatment(FeatureEngineeringStrategy):
         upper_bound = Q3 + 1.5 * IQR
 
         # Identify outliers
-        outliers_sqft = df[(df['price_per_sqft'] < lower_bound) | (df['price_per_sqft'] > upper_bound)]
+        outliers_sqft = data[(data['price_per_sqft'] < lower_bound) | (data['price_per_sqft'] > upper_bound)]
 
         # Displaying the number of outliers and some statistics
 
@@ -218,52 +218,51 @@ class OutlierTreatment(FeatureEngineeringStrategy):
         data.update(outliers_sqft)
 
         """Area"""
-        df.drop(index=[818, 1796, 1123, 2, 2356, 115, 3649, 2503, 1471], inplace=True)
-        df.loc[48, 'area'] = 115 * 9
-        df.loc[300, 'area'] = 7250
-        df.loc[2666, 'area'] = 5800
-        df.loc[1358, 'area'] = 2660
-        df.loc[3195, 'area'] = 2850
-        df.loc[2131, 'area'] = 1812
-        df.loc[3088, 'area'] = 2160
-        df.loc[3444, 'area'] = 1175
+        data.drop(index=[818, 1796, 1123, 2, 2356, 115, 3649, 2503, 1471], inplace=True)
+        data.loc[48, 'area'] = 115 * 9
+        data.loc[300, 'area'] = 7250
+        data.loc[2666, 'area'] = 5800
+        data.loc[1358, 'area'] = 2660
+        data.loc[3195, 'area'] = 2850
+        data.loc[2131, 'area'] = 1812
+        data.loc[3088, 'area'] = 2160
+        data.loc[3444, 'area'] = 1175
 
-        df.loc[2131, 'carpet_area'] = 1812
-        df['price_per_sqft'] = round((df['price'] * 10000000) / df['area'])
-        x = df[df['price_per_sqft'] <= 20000]
+        data.loc[2131, 'carpet_area'] = 1812
+        data['price_per_sqft'] = round((data['price'] * 10000000) / data['area'])
+        x = data[data['price_per_sqft'] <= 20000]
         (x['area'] / x['bedRoom']).quantile(0.02)
 
-        sbc_df = df[
-            ~(df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & ~(df['carpet_area'].isnull())]
+        sbc_df = data[~(data['super_built_up_area'].isnull()) & (data['built_up_area'].isnull()) & ~(data['carpet_area'].isnull())]
 
         sbc_df['built_up_area'].fillna(
             round(((sbc_df['super_built_up_area'] / 1.105) + (sbc_df['carpet_area'] / 0.9)) / 2),
             inplace=True)
-        df.update(sbc_df)
+        data.update(sbc_df)
 
         # sb present c is null built up null
-        sb_df = df[
-            ~(df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & (df['carpet_area'].isnull())]
+        sb_df = data[
+            ~(data['super_built_up_area'].isnull()) & (data['built_up_area'].isnull()) & (data['carpet_area'].isnull())]
 
         sb_df['built_up_area'].fillna(round(sb_df['super_built_up_area'] / 1.105), inplace=True)
-        df.update(sb_df)
+        data.update(sb_df)
 
         # sb null c is present built up null
-        c_df = df[(df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & ~(df['carpet_area'].isnull())]
+        c_df = data[(data['super_built_up_area'].isnull()) & (data['built_up_area'].isnull()) & ~(data['carpet_area'].isnull())]
         c_df['built_up_area'].fillna(round(c_df['carpet_area'] / 0.9), inplace=True)
-        df.update(c_df)
+        data.update(c_df)
 
-        anamoly_df = df[(df['built_up_area'] < 2000) & (df['price'] > 2.5)][['price', 'area', 'built_up_area']]
+        anamoly_df = data[(data['built_up_area'] < 2000) & (data['price'] > 2.5)][['price', 'area', 'built_up_area']]
         anamoly_df['built_up_area'] = anamoly_df['area']
-        df.update(anamoly_df)
+        data.update(anamoly_df)
 
-        df['floorNum'].fillna(2.0, inplace=True)
-        df.drop(columns=['facing'], inplace=True)
-        df.drop(index=[2536], inplace=True)
+        data['floorNum'].fillna(2.0, inplace=True)
+        data.drop(columns=['facing'], inplace=True)
+        data.drop(index=[2536], inplace=True)
 
         def mode_based_imputation(row):
             if row['agePossession'] == 'Undefined':
-                mode_value = df[(df['sector'] == row['sector']) & (df['property_type'] == row['property_type'])][
+                mode_value = data[(data['sector'] == row['sector']) & (data['property_type'] == row['property_type'])][
                     'agePossession'].mode()
                 # If mode_value is empty (no mode found), return NaN, otherwise return the mode
                 if not mode_value.empty:
@@ -273,11 +272,11 @@ class OutlierTreatment(FeatureEngineeringStrategy):
             else:
                 return row['agePossession']
 
-        df['agePossession'] = df.apply(mode_based_imputation, axis=1)
+        data['agePossession'] = data.apply(mode_based_imputation, axis=1)
 
         def mode_based_imputation2(row):
             if row['agePossession'] == 'Undefined':
-                mode_value = df[(df['sector'] == row['sector'])]['agePossession'].mode()
+                mode_value = data[(data['sector'] == row['sector'])]['agePossession'].mode()
                 # If mode_value is empty (no mode found), return NaN, otherwise return the mode
                 if not mode_value.empty:
                     return mode_value.iloc[0]
@@ -286,11 +285,11 @@ class OutlierTreatment(FeatureEngineeringStrategy):
             else:
                 return row['agePossession']
 
-        df['agePossession'] = df.apply(mode_based_imputation2, axis=1)
+        data['agePossession'] = data.apply(mode_based_imputation2, axis=1)
 
         def mode_based_imputation3(row):
             if row['agePossession'] == 'Undefined':
-                mode_value = df[(df['property_type'] == row['property_type'])]['agePossession'].mode()
+                mode_value = data[(data['property_type'] == row['property_type'])]['agePossession'].mode()
                 # If mode_value is empty (no mode found), return NaN, otherwise return the mode
                 if not mode_value.empty:
                     return mode_value.iloc[0]
@@ -299,9 +298,9 @@ class OutlierTreatment(FeatureEngineeringStrategy):
             else:
                 return row['agePossession']
 
-        df['agePossession'] = df.apply(mode_based_imputation3, axis=1)
+        data['agePossession'] = data.apply(mode_based_imputation3, axis=1)
 
-        return df
+        return data
 
 class Appartments(FeatureEngineeringStrategy):
     pass
