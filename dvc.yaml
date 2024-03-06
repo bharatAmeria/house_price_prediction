@@ -1,8 +1,8 @@
 stages:
   data_ingestion:
-    cmd: python src/pipeline/stage01.py
+    cmd: python src/pipeline/stage01_data_ingestion.py
     deps:
-      - src/pipeline/stage01.py
+      - src/pipeline/stage01_data_ingestion.py
       - config/config.yaml
     outs:
       - artifacts/data_ingestion/gurgaon_properties

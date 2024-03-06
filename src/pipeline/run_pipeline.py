@@ -34,7 +34,7 @@ class Test:
         final_data = feature_engineering.handle_FE(cleaned_data)
 
         outlier = OutlierTreatment()
-        outlier_data = outlier.handle_FE(final_data)
+        outlier_data = outlier.handle_FE()
 
         feature_selection = FeatureSelection()
         feature_selection_data = feature_selection.handle_FE(outlier_data)

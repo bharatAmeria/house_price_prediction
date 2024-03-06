@@ -1,5 +1,5 @@
 import re
-from typing import Union
+from typing import Union, Any
 
 import numpy as np
 import pandas as pd
@@ -183,7 +183,7 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
             raise e
 
 class OutlierTreatment(FeatureEngineeringStrategy):
-    def handle_FE(self, df: pd.DataFrame) -> pd.DataFrame:
+    def handle_FE(self, data: pd.DataFrame) -> pd.DataFrame:
         # Calculate the IQR for the 'price' column
         Q1 = df['price'].quantile(0.25)
         Q3 = df['price'].quantile(0.75)
@@ -319,7 +319,7 @@ class DataDivideStrategy(FeatureEngineeringStrategy):
     Data dividing strategy which divides the data into train and test data.
     """
 
-    def handle_FE(self, data: pd.DataFrame) -> Union[pd.DataFrame, pd.Series]:
+    def handle_FE(self, data: pd.DataFrame) -> tuple[Any, Any, Any, Any]:
         """
         Divides the data into train and test data.
         """
@@ -346,6 +346,3 @@ class FeatureEngineering:
 
     def handle_FE(self) -> Union[pd.DataFrame, pd.Series]:
         return self.strategy.handle_FE(self.cleaned_data)
-
-
-

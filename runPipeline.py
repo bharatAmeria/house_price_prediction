@@ -32,8 +32,9 @@ STAGE_NAME = "Feature Engineering Stage"
 try:
     logger.info(f"*******************")
     logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+    cleaned_data = CleaningStage.main()
     feature_engg = FeatureEngineeringStage()
-    feature_engg.main()
+    feature_engg.main(cleaned_data)
     logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
 except Exception as e:
     logger.exception(e)
