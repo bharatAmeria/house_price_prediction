@@ -21,6 +21,15 @@ class ModelTrainerConfig:
     model_dir: Path
 
 @dataclass(frozen=True)
+class DataDividerConfig:
+    root_dir: Path
+    train_dir: Path
+    test_dir: Path
+    params_train_size: float
+    params_test_size: float
+    params_random_state: int
+
+@dataclass(frozen=True)
 class EvaluationConfig:
     path_of_model: str
     training_data: str

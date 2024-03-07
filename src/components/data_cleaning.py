@@ -28,7 +28,7 @@ class DataPreprocessStrategy(DataStrategy):
         try:
             data.insert(loc=3, column='sector',
                         value=data['property_name'].str.split('in').str.get(1).str.replace('Gurgaon', '').str.strip())
-
+            data['sector'] = data['sector'].str.lower()
             data['society'] = data['society'].str.replace('nan', 'independent')
 
             data['sector'] = data['sector'].str.replace('dharam colony', 'sector 12')
@@ -125,7 +125,9 @@ class DataPreprocessStrategy(DataStrategy):
 
             data.drop(columns=['property_name', 'address', 'description', 'rating'], inplace=True)
 
-            return data
+            cleaned_data_v1 = data
+            return cleaned_data_v1
+
         except Exception as e:
             logger.error(e)
             raise e

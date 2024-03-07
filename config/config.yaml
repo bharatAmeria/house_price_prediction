@@ -11,6 +11,13 @@ data_transformation:
   root_dir: artifacts/data_transformation
   directory: artifacts/data_transformation/preprocessor.pkl
 
+data_divider:
+  root_dir: artifacts/data_divider
+  train_dir: artifacts/data_divider/train.csv
+  test_dir: artifacts/data_divider/test.csv
+  validation_dir: artifacts/data_divider/validation.csv
+
+
 model_trainer:
   root_dir: model
   model_dir: model/model.pkl

@@ -1,4 +1,5 @@
-from src.entity.config_entity import DataIngestionConfig, EvaluationConfig, DataTransformationConfig, ModelTrainerConfig
+from src.entity.config_entity import DataIngestionConfig, EvaluationConfig, DataTransformationConfig, \
+    ModelTrainerConfig, DataDividerConfig
 from src.utils.common import read_yaml, create_directories
 from src.constants.constants import CONFIG_FILE_PATH, PARAMS_FILE_PATH
 
@@ -47,6 +48,21 @@ class ConfigurationManager:
         )
 
         return model_config
+
+    def get_data_divider(self) -> DataDividerConfig:
+        config = self.config.data_divider
+
+        create_directories([config.root_dir])
+        data_divider = DataDividerConfig(
+            root_dir=config.root_dir,
+            train_dir=config.train_dir,
+            test_dir=config.test_dir,
+            params_test_size=self.params.TEST_SIZE,
+            params_train_size=self.params.TRAIN_SIZE,
+            params_random_state=self.params.RANDOM_STATE,
+        )
+
+        return data_divider
 
     def get_evaluation_config(self) -> EvaluationConfig:
         eval_config = EvaluationConfig(

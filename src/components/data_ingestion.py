@@ -17,7 +17,6 @@ class IngestData:
     def __init__(self, config: DataIngestionConfig):
         """Initialize the data ingestion class."""
         self.config = config
-        self.data_Path = self.config.data_path
 
     def download_file(self):
         """ Fetch data from the url """
