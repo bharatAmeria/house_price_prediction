@@ -16,11 +16,6 @@ class DataTransformationConfig:
     directory: Path
 
 @dataclass(frozen=True)
-class ModelTrainerConfig:
-    root_dir: Path
-    model_dir: Path
-
-@dataclass(frozen=True)
 class DataDividerConfig:
     root_dir: Path
     train_dir: Path

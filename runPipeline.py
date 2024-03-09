@@ -1,22 +1,20 @@
 from src import logger
 from src.components.feature_engineering import FeatureEngineeringConfig, OutlierTreatment, MissingValueImputation, \
-    FeatureSelection, FeatureEngineering, FeatureEngineeringStrategy
-from src.entity.config_entity import DataDividerConfig
+    FeatureSelection, FeatureEngineering, FeatureEngineeringStrategy, DataDivideStrategy
 from src.pipeline.stage01_data_ingestion import DataIngestionTrainingPipeline
 from src.pipeline.stage02_data_cleaning import CleaningStage
 
+STAGE_NAME = "Data Ingestion stage"
 
-# STAGE_NAME = "Data Ingestion stage"
-#
-# try:
-#     logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
-#     data_ingestion = DataIngestionTrainingPipeline()
-#     data_ingestion.main()
-#     logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
-# except Exception as e:
-#     logger.exception(e)
-#     raise e
-#
+try:
+    logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+    data_ingestion = DataIngestionTrainingPipeline()
+    data_ingestion.main()
+    logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+except Exception as e:
+    logger.exception(e)
+    raise e
+
 STAGE_NAME = "Data Cleaning Stage"
 
 try:
@@ -68,8 +66,8 @@ try:
     logger.info(f">>>>>> stage {STAGE_NAME} 5: DataDivideStrategy started <<<<<<")
 
     # Feature Engineering Stage 5: DataDivideStrategy
-    # data_divide_strategy = DataDivideStrategy()
-    # train_data_path, test_data_path = data_divide_strategy.handle_FE(cleaned_data)
+    data_divide_strategy = DataDivideStrategy()
+    X_train, y_train, X_test, y_test = data_divide_strategy.handle_FE(cleaned_data)
 
     logger.info(f">>>>>> stage {STAGE_NAME} 5: DataDivideStrategy completed <<<<<<")
     logger.info(f">>>>>> All Feature Engineering Stages completed successfully! <<<<<<")
@@ -77,4 +75,3 @@ try:
 except Exception as e:
     logger.exception(e)
     raise e
-

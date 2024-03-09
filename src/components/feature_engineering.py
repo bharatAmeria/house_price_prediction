@@ -467,8 +467,7 @@ class DataDivideStrategy(FeatureEngineeringStrategy):
 
             logger.info("Ingestion of the data is completed")
 
-            return ("artifacts/data_divider/train.csv",
-                    "artifacts/data_divider/test.csv")
+            return X_train, y_train, X_test, y_test
 
         except Exception as e:
             logger.error(e)

@@ -2,7 +2,7 @@ from runPipeline import cleaning_stage
 from src import logger
 from src.components.feature_engineering import FeatureEngineering, FeatureEngineeringStrategy, OutlierTreatment, \
     FeatureSelection, DataDivideStrategy, MissingValueImputation, FeatureEngineeringConfig
-from src.entity.config_entity import DataDividerConfig
+from src.components.model_trainer import ModelTrainer
 from src.pipeline.stage02_data_cleaning import CleaningStage
 
 STAGE_NAME = 'Feature Engineering Stage'
@@ -37,25 +37,18 @@ class FeatureEngineeringStage:
         cleaned_data = feature_selection.handle_FE(cleaned_data)
 
         # Feature Engineering Stage 5: DataDivideStrategy
-        data_divider_config = DataDividerConfig()
-        data_divide_strategy = DataDivideStrategy(config=data_divider_config)
-        train_data_path, test_data_path = data_divide_strategy.handle_FE(cleaned_data)
+        data_divide_strategy = DataDivideStrategy()
+        X_train, y_train, X_test, y_test = data_divide_strategy.handle_FE(cleaned_data)
 
-        # # Instantiate FeatureEngineering
-        # fe_strategy = FeatureEngineeringStrategy()
-        # fe = FeatureEngineering(data=cleaned_data, strategy=fe_strategy)
-        # fe_data = fe.handle_FE()
-        # return fe_data
+        # For example, you can print the shapes of the datasets:
+        print("X_train shape:", X_train.shape)
+        print("y_train shape:", y_train.shape)
+        print("X_test shape:", X_test.shape)
+        print("y_test shape:", y_test.shape)
 
-        # outlier_strategy = OutlierTreatment()
-        # outlier = FeatureEngineering(data=cleaned_data, strategy=outlier_strategy)
-        # outlier_data = outlier.handle_FE()
-        #
-        # missing_strategy = MissingValueImputation()
-        # missing = missing_strategy.handle_FE(data=outlier_data)
-        #
-        # feature_selection = FeatureSelection()
-        # feature_selection_data = feature_selection.handle_FE(data=missing)
+        model_trainer = ModelTrainer()
+        r2_square = model_trainer.initiate_model_trainer(X_train, y_train)
+        return r2_square
 
 
 if __name__ == '__main__':
