@@ -1,12 +1,14 @@
 import json
 import pickle
 
+import numpy as np
 from box import ConfigBox
 import yaml
 from pathlib import Path
 
-from sklearn.metrics import r2_score
-from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import r2_score, mean_absolute_error
+from sklearn.model_selection import GridSearchCV, KFold, cross_val_score, train_test_split
+from sklearn.pipeline import Pipeline
 
 from src import logger
 from ensure import ensure_annotations
@@ -125,7 +127,7 @@ def evaluate_models(X_train, y_train, X_test, y_test, models, param):
 
             y_test_pred = model.predict(X_test)
 
-            train_model_score = r2_score(y_train, y_train_pred)
+            r2_score(y_train, y_train_pred)
 
             test_model_score = r2_score(y_test, y_test_pred)
 
@@ -136,3 +138,31 @@ def evaluate_models(X_train, y_train, X_test, y_test, models, param):
     except Exception as e:
         logger.exception(e)
         raise e
+
+
+def scorer(model_name, model, preprocessor=None, y_transformed=None, X=None):
+    output = []
+    output.append(model_name)
+
+    pipeline = Pipeline([
+        ('preprocessor', preprocessor),
+        ('regressor', model)
+    ])
+
+    # K-fold cross-validation
+    kfold = KFold(n_splits=10, shuffle=True, random_state=42)
+    scores = cross_val_score(pipeline, X, y_transformed, cv=kfold, scoring='r2')
+
+    output.append(scores.mean())
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y_transformed, test_size=0.2, random_state=42)
+
+    pipeline.fit(X_train, y_train)
+
+    y_pred = pipeline.predict(X_test)
+
+    y_pred = np.expm1(y_pred)
+
+    output.append(mean_absolute_error(np.expm1(y_test), y_pred))
+
+    return output

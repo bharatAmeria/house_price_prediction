@@ -3,6 +3,7 @@ from src.components.feature_engineering import FeatureEngineeringConfig, Outlier
     FeatureSelection, FeatureEngineering, FeatureEngineeringStrategy, DataDivideStrategy
 from src.pipeline.stage01_data_ingestion import DataIngestionTrainingPipeline
 from src.pipeline.stage02_data_cleaning import CleaningStage
+from src.pipeline.stage04_model_training import ModelTrainingStage
 
 STAGE_NAME = "Data Ingestion stage"
 
@@ -72,6 +73,17 @@ try:
     logger.info(f">>>>>> stage {STAGE_NAME} 5: DataDivideStrategy completed <<<<<<")
     logger.info(f">>>>>> All Feature Engineering Stages completed successfully! <<<<<<")
     logger.info(f"*******************\n\nx==========x")
+except Exception as e:
+    logger.exception(e)
+    raise e
+
+TAGE_NAME = "Model Training Stage"
+
+try:
+    logger.info(f"*******************")
+    training = ModelTrainingStage()
+    model = training.main()
+    logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
 except Exception as e:
     logger.exception(e)
     raise e

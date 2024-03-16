@@ -60,3 +60,4 @@ class ConfigurationManager:
             all_params=self.params,
         )
         return eval_config
+

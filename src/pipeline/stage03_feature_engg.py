@@ -2,17 +2,17 @@ from runPipeline import cleaning_stage
 from src import logger
 from src.components.feature_engineering import FeatureEngineering, FeatureEngineeringStrategy, OutlierTreatment, \
     FeatureSelection, DataDivideStrategy, MissingValueImputation, FeatureEngineeringConfig
-from src.components.model_trainer import ModelTrainer
 from src.pipeline.stage02_data_cleaning import CleaningStage
 
 STAGE_NAME = 'Feature Engineering Stage'
+
 
 class FeatureEngineeringStage:
     def __init__(self):
         pass
 
-    def main(self, cleaned_data):
-
+    @staticmethod
+    def main(cleaned_data):
         # Cleaning Stage 1: CleaningConfig
         cleaned_data = cleaning_stage.main()
 
@@ -36,20 +36,7 @@ class FeatureEngineeringStage:
         feature_selection = FeatureSelection()
         cleaned_data = feature_selection.handle_FE(cleaned_data)
 
-        # Feature Engineering Stage 5: DataDivideStrategy
-        data_divide_strategy = DataDivideStrategy()
-        X_train, y_train, X_test, y_test = data_divide_strategy.handle_FE(cleaned_data)
-
-        # For example, you can print the shapes of the datasets:
-        print("X_train shape:", X_train.shape)
-        print("y_train shape:", y_train.shape)
-        print("X_test shape:", X_test.shape)
-        print("y_test shape:", y_test.shape)
-
-        model_trainer = ModelTrainer()
-        r2_square = model_trainer.initiate_model_trainer(X_train, y_train)
-        return r2_square
-
+        return cleaned_data
 
 if __name__ == '__main__':
     try:
